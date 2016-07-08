@@ -49,6 +49,57 @@
       <velocity_decay/>
       <self_collide>0</self_collide>
     </link>
+
+    <link name='link_pendulum'>
+      <pose>0 0 -0 0 -0 0</pose>
+      <inertial>
+        <pose>0 0 1.11 0 -0 0</pose>
+	<mass>0.2</mass>
+	<inertia>
+	  <ixx>0.334167</ixx>
+	  <ixy>0</ixy>
+	  <ixz>0</ixz>
+	  <iyy>0.334167</iyy>
+	  <iyz>0</iyz>
+	  <izz>0.00166667</izz>
+	</inertia>
+      </inertial>
+      <collision name='collision_stick'>
+        <pose>0 0 1.11 0 0 0</pose>
+	<geometry>
+	  <cylinder>
+            <radius>0.005</radius>
+            <length>2</length>
+          </cylinder>
+        </geometry>
+      </collision>
+      <visual name='visual_stick'>
+        <pose>0 0 1.11 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <radius>0.005</radius>
+            <length>2</length>
+          </cylinder>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Orange</name>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <joint name='joint_pendulum' type='ball'>
+      <pose>0 0 0.11 0 -0 0</pose>
+      <child>link_pendulum</child>
+      <parent>base_link</parent>
+    </joint>
+    <plugin name='pendulum' filename='librotors_gazebo_pendulum_plugin.so'>
+      <robotNamespace>iris</robotNamespace>
+      <jointName>joint_pendulum</jointName>
+      <linkName>link_pendulum</linkName>
+    </plugin>
+
     <link name='iris/imu_link'>
       <pose>0 0 0 0 -0 0</pose>
       <inertial>
