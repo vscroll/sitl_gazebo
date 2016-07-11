@@ -83,8 +83,8 @@ bool PendulumCtrl::open() {
 //	_attitude_pub = _nh.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_attitude/attitude", 10);
 	_attitude_pub = _nh.advertise<geometry_msgs::TwistStamped>("/mavros/setpoint_attitude/cmd_vel", 10);
 
-	_arming_client = _nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
-	_set_mode_client = _nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+	_arming_client = _nh.serviceClient<mavros_msgs::CommandBool>("/mavros/cmd/arming");
+	_set_mode_client = _nh.serviceClient<mavros_msgs::SetMode>("/mavros/set_mode");
 }
 
 void PendulumCtrl::close() {
