@@ -28,6 +28,9 @@ set (msgs
   CommandTrajectory.proto
   CommandVelocityTrajectory.proto
   MotorSpeed.proto
+  PendulumPose.proto
+  VehiclePose.proto
+  VehiclePendulumPose.proto
 )
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 add_library(mav_msgs SHARED ${PROTO_SRCS})

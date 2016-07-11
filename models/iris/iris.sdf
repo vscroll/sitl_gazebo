@@ -94,7 +94,7 @@
       <child>link_pendulum</child>
       <parent>base_link</parent>
     </joint>
-    <plugin name='pendulum' filename='librotors_gazebo_pendulum_plugin.so'>
+    <plugin name='pendulum' filename='libgazebo_pendulum_plugin.so'>
       <robotNamespace>iris</robotNamespace>
       <jointName>joint_pendulum</jointName>
       <linkName>link_pendulum</linkName>
