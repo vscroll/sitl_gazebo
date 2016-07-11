@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include <fmaros_msgs/PendulumPose.h>
+#include <fmaros_msgs/VehiclePose.h>
 #include "VehiclePendulumPose.pb.h"
 
 #define PORT 14000
@@ -43,13 +44,12 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
 
   ros::Publisher pendulum_pub = n.advertise<fmaros_msgs::PendulumPose>("/FMA/Pendulum/Pose", 1000);
+  ros::Publisher vehicle_pub = n.advertise<fmaros_msgs::VehiclePose>("/FMA/Vehicle/Pose", 1000);
 
   ros::Rate loop_rate(10);
 
   while (ros::ok())
   {
-    fmaros_msgs::PendulumPose pose;
-
     ros::spinOnce();
 
     loop_rate.sleep();
@@ -65,21 +65,43 @@ int main(int argc, char **argv)
 	pendulum_msgs::msgs::PendulumPose pendulumpose = pose_message_.pendulum_pose();
 	vehicle_msgs::msgs::VehiclePose vehiclepose =  pose_message_.vehicle_pose(0);
 
-	pose.header.stamp.nsec = time;
+	fmaros_msgs::PendulumPose pendulum_pose;
 
-	pose.position.x = pendulumpose.x();
-	pose.position.y = pendulumpose.y();
-	pose.position.z = pendulumpose.z();
+	pendulum_pose.header.stamp.nsec = time;
+	pendulum_pose.position.x = pendulumpose.x();
+	pendulum_pose.position.y = pendulumpose.y();
+	pendulum_pose.position.z = pendulumpose.z();
+	pendulum_pose.velocity.x = pendulumpose.vx();
+	pendulum_pose.velocity.y = pendulumpose.vy();
+	pendulum_pose.velocity.z = pendulumpose.vz();
+	pendulum_pose.vel_acc.x = pendulumpose.acc_x();
+	pendulum_pose.vel_acc.y = pendulumpose.acc_y();
+	pendulum_pose.vel_acc.z = pendulumpose.acc_z();
 
-	pose.velocity.x = pendulumpose.vx();
-	pose.velocity.y = pendulumpose.vy();
-	pose.velocity.z = pendulumpose.vz();
+	pendulum_pub.publish(pendulum_pose);
 
-	pose.vel_acc.x = pendulumpose.acc_x();
-	pose.vel_acc.y = pendulumpose.acc_y();
-	pose.vel_acc.z = pendulumpose.acc_z();
+	fmaros_msgs::VehiclePose vehicle_pose;
 
-	pendulum_pub.publish(pose);
+	vehicle_pose.position.x =vehiclepose.x();
+	vehicle_pose.position.y =vehiclepose.y();
+	vehicle_pose.position.z =vehiclepose.z();
+	vehicle_pose.velocity.x =vehiclepose.vx();
+	vehicle_pose.velocity.y =vehiclepose.vy();
+	vehicle_pose.velocity.z =vehiclepose.vz();
+	vehicle_pose.vel_acc.x =vehiclepose.acc_x();
+	vehicle_pose.vel_acc.y =vehiclepose.acc_y();
+	vehicle_pose.vel_acc.x =vehiclepose.acc_z();
+	vehicle_pose.angle.x =vehiclepose.roll();
+	vehicle_pose.angle.y =vehiclepose.pitch();
+	vehicle_pose.angle.z =vehiclepose.yaw();
+	vehicle_pose.ang_rate.x =vehiclepose.roll_rate();
+	vehicle_pose.ang_rate.y =vehiclepose.pitch_rate();
+	vehicle_pose.ang_rate.z =vehiclepose.yaw_rate();
+	vehicle_pose.ang_rate_acc.x =vehiclepose.roll_acc();
+	vehicle_pose.ang_rate_acc.y =vehiclepose.pitch_acc();
+	vehicle_pose.ang_rate_acc.z =vehiclepose.yaw_acc();
+
+	vehicle_pub.publish(vehicle_pose);
     }
   }
 
