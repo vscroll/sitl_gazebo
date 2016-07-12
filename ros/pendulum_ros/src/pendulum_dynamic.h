@@ -98,18 +98,63 @@ public:
 	static void formula_5(const double vel_acc_x, const double vel_acc_y,
 						double* angle_x, double* angle_y, double* a) {
 		/*
+
+		version 1:
 		vel_acc_x=a*sin(angle_y)
 		vel_acc_y=-a*cos(angle_y)*sin(angle_x)
 		vel_acc_z=a*cos(angle_y)*cos(angle_x)-g
 		vel_acc_z=0
 
-		*/
-
 		*angle_x = atan(-vel_acc_y/g);
 		*angle_y = atan(-vel_acc_x*sin(*angle_x)/vel_acc_y);
 		*a = vel_acc_x/sin(*angle_y);
-		
 
+		*/
+
+		/*
+		version 2:
+		    |1 0            0            |
+		RMx=|0 cos(angle_x) -sin(angle_x)|
+		    |0 sin(angle_x) cos(angle_x) |
+
+		    |cos(angle_y)  0 sin(angle_y)|
+		RMy=|0             1 0           |
+		    |-sin(angle_y) 0 cos(angle_y)|
+
+		    |cos(angle_z) -sin(angle_z) 0|
+		RMz=|sin(angle_z) cos(angle_z)  0|
+		    |0            0             1|
+
+		|vel_acc_x|             |0|   |0|
+		|vel_acc_y|=RMz*RMy*RMx*|0| + |0|
+		|vel_acc_z|             |a|   |g|
+
+
+		|vel_acc_x| |cos(angle_z) -sin(angle_z) 0|   |cos(angle_y)  0 sin(angle_y)|   |1 0            0            |   |0|   |0|
+		|vel_acc_y|=|sin(angle_z) cos(angle_z)  0| * |0             1 0           | * |0 cos(angle_x) -sin(angle_x)| * |0| + |0|
+		|vel_acc_z| |0            0             1|   |-sin(angle_y) 0 cos(angle_y)|   |0 sin(angle_x) cos(angle_x) |   |a|   |g|
+
+		            |a*(sin(angle_x)*sin(angle_z) + cos(angle_x)*cos(angle_z)*sin(angle_y)) |
+		           =|-a*(cos(angle_z)*sin(angle_x) - cos(angle_x)*sin(angle_y)*sin(angle_z))|
+		            |a*cos(angle_x)*cos(angle_y) - g                                        |
+
+		vel_acc_z=0
+		angle_z=0
+		cos(angle_z)=1
+		sin(angle_z)=0
+
+		==>
+
+		vel_acc_x=a*cos(angle_x)*sin(angle_y)
+		vel_acc_y=-a*sin(angle_x)
+		0=a*cos(angle_x)cos(angle_y)-g
+
+		=>
+		*/
+
+		*angle_y = atan(vel_acc_x/g);
+		*angle_x = atan(-vel_acc_y*sin(*angle_y)/vel_acc_x);
+		*a = -vel_acc_y/sin(*angle_x);
 	}
 
 	static void formula_7(const double angle_x, const double angle_y,
