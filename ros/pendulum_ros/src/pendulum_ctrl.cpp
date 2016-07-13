@@ -62,12 +62,13 @@ void PendulumCtrl::cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32
 	} else if (config.vehicle_cmd == VEHICLE_CMD_DISARMED) {
 		disarmed();
 	} else if (config.vehicle_cmd == VEHICLE_CMD_TAKEOFF) {
-		armed();
 		takeoff();
 	} else if (config.vehicle_cmd == VEHICLE_CMD_POSCTL) {
 		set_posctl();
 	} else if (config.vehicle_cmd == VEHICLE_CMD_OFFBOARD) {
 		set_offboard();
+	} else if (config.vehicle_cmd == VEHICLE_CMD_SEQUENCE) {
+		set_cmd_sequence();
 	} else {
 	}
 }
@@ -119,7 +120,7 @@ void PendulumCtrl::threadFun() {
 		_pose.vel_acc = _pose_local.vel_acc;
 */
 		if (_pose.header.seq == _pose_local.header.seq) {
-			ROS_INFO("no pose data");
+			//ROS_INFO("no pose data");
 			continue;
 		}
 
@@ -167,7 +168,7 @@ void PendulumCtrl::threadFun() {
 									angle_x, angle_y,
 									&vehicle_rate_x, &vehicle_rate_y);
 			//ROS_INFO("formula 7:%f %f", vehicle_rate_x, vehicle_rate_y);
-
+/*
 			ROS_INFO("result:%f    %f %f %f %f    %f %f %f %f    %f %f  %f %f %f %f  %f %f",
 				_pendulum_l,
 				_pose.position.x, _pose.position.y, _pendulum_output_x, _pendulum_output_y,
@@ -175,7 +176,7 @@ void PendulumCtrl::threadFun() {
 				vehicle_vel_acc_x, vehicle_vel_acc_y,
 				angle_x, angle_y, a, a/(_vehicle_multi_g*PendulumDynamic::g),
 				vehicle_rate_x, vehicle_rate_y);
-
+*/
 			if (_throttle_pub) {
 				std_msgs::Float64 throttle;
 				throttle.data = a/(_vehicle_multi_g*PendulumDynamic::g); // 0~1
@@ -266,6 +267,23 @@ void PendulumCtrl::set_offboard() {
 	}
 }
 
+void PendulumCtrl::set_cmd_sequence() {
+	ros::Rate rate(1);
+	armed();
+	rate.sleep();
+	takeoff();
+	rate.sleep();
+	rate.sleep();
+	rate.sleep();
+	rate.sleep();
+
+	_reset_pose = true;
+	reset_pose();
+	start();
+	rate.sleep();
+
+	set_offboard();
+}
 void PendulumCtrl::pendulum_pose_callback(const fmaros_msgs::PendulumPose::ConstPtr& msg) {
 /*
 	_pose_local.header = msg->header;

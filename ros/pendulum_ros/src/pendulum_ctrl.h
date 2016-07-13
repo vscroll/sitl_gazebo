@@ -31,6 +31,7 @@ private:
 	void takeoff();
 	void set_posctl();
 	void set_offboard();
+	void set_cmd_sequence();
 
 private:
 	void cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32_t level);
@@ -91,6 +92,7 @@ private:
 	static const int VEHICLE_CMD_TAKEOFF = 3;
 	static const int VEHICLE_CMD_POSCTL = 4;
 	static const int VEHICLE_CMD_OFFBOARD = 5;
+	static const int VEHICLE_CMD_SEQUENCE = 6;
 
 };
 
