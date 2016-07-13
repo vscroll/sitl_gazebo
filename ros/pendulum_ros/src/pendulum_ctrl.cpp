@@ -142,20 +142,20 @@ void PendulumCtrl::threadFun() {
 			double angle_x = 0.0;
 			double angle_y = 0.0;
 			double a = 0;
-			PendulumDynamic::formula_5(vehicle_vel_acc_x, vehicle_vel_acc_y,
+			PendulumDynamic::formula_5_2(vehicle_vel_acc_x, vehicle_vel_acc_y,
 								&angle_x, &angle_y, &a);
-			ROS_INFO("formula 5:%f %f %f", angle_x, angle_y, a);
+			ROS_INFO("formula 5:%f %f %f %f", angle_x, angle_y, a, a/(1.5*PendulumDynamic::g));
 
 			double vehicle_rate_x = 0.0;
 			double vehicle_rate_y = 0.0;
 			PendulumDynamic::formula_7(angle_x, angle_y,
-									200, 200,
+									angle_x, angle_y,
 									&vehicle_rate_x, &vehicle_rate_y);
 			ROS_INFO("formula 7:%f %f", vehicle_rate_x, vehicle_rate_y);
 
 			if (_throttle_pub) {
 				std_msgs::Float64 throttle;
-				throttle.data = a; // 0~1
+				throttle.data = a/(1.5*PendulumDynamic::g); // 0~1
 				_throttle_pub.publish(throttle);
 			}
 
