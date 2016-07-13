@@ -29,8 +29,9 @@ PendulumCtrl::~PendulumCtrl() {
 
 void PendulumCtrl::cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32_t level) {
 
-	ROS_INFO("Reconfigure Request: %f %f %f %f %f %f %f %d %d", 
+	ROS_INFO("Reconfigure Request: %f %f %f %f %f %f %f %f %d %d",
 			config.pendulum_l,
+			config.vehicle_multi_g,
 			config.pendulum_x_p,
 			config.pendulum_x_i, 
 			config.pendulum_x_d,
@@ -42,6 +43,7 @@ void PendulumCtrl::cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32
 			);
 
 	_pendulum_l = config.pendulum_l;
+	_vehicle_multi_g = config.vehicle_multi_g;
 	_pendulum_x_pid.setGains(config.pendulum_x_p, config.pendulum_x_i, config.pendulum_x_d);
 	_pendulum_y_pid.setGains(config.pendulum_y_p, config.pendulum_y_i, config.pendulum_y_d);
 
@@ -60,6 +62,7 @@ void PendulumCtrl::cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32
 	} else if (config.vehicle_cmd == VEHICLE_CMD_DISARMED) {
 		disarmed();
 	} else if (config.vehicle_cmd == VEHICLE_CMD_TAKEOFF) {
+		armed();
 		takeoff();
 	} else if (config.vehicle_cmd == VEHICLE_CMD_POSCTL) {
 		set_posctl();
@@ -71,6 +74,7 @@ void PendulumCtrl::cfg_pid_callback(pendulum_ros::PendulumConfig &config, uint32
 
 void PendulumCtrl::reset_pose() {
 	memset(&_pose.header.stamp, 0, sizeof(_pose.header.stamp));
+	_pose.header.seq = 0;
 }
 
 bool PendulumCtrl::open() {
@@ -102,6 +106,9 @@ void* PendulumCtrl::threadRun(void* argument) {
 void PendulumCtrl::threadFun() {
 	ROS_INFO("threadFun");
 	while(ros::ok()) {
+
+		_rate.sleep();
+
 		if (!_started) {
 			continue;
 		}
@@ -111,7 +118,15 @@ void PendulumCtrl::threadFun() {
 		_pose.velocity = _pose_local.velocity;
 		_pose.vel_acc = _pose_local.vel_acc;
 */
+		if (_pose.header.seq == _pose_local.header.seq) {
+			ROS_INFO("no pose data");
+			continue;
+		}
+
 		_pose = _pose_local;
+		if (_pose.header.seq <= 0) {
+			continue;
+		}
 
 		if (_reset_pose) {
 			ROS_INFO("reset pose");
@@ -137,25 +152,33 @@ void PendulumCtrl::threadFun() {
 								_pose.vel_acc,
 								&vehicle_vel_acc_x,
 								&vehicle_vel_acc_y);
-			ROS_INFO("formula 12:%f %f", vehicle_vel_acc_x, vehicle_vel_acc_y);
+			//ROS_INFO("formula 12:%f %f", vehicle_vel_acc_x, vehicle_vel_acc_y);
 
 			double angle_x = 0.0;
 			double angle_y = 0.0;
 			double a = 0;
 			PendulumDynamic::formula_5_2(vehicle_vel_acc_x, vehicle_vel_acc_y,
 								&angle_x, &angle_y, &a);
-			ROS_INFO("formula 5:%f %f %f %f", angle_x, angle_y, a, a/(1.5*PendulumDynamic::g));
+			//ROS_INFO("formula 5:%f %f %f %f", angle_x, angle_y, a, a/(2*PendulumDynamic::g));
 
 			double vehicle_rate_x = 0.0;
 			double vehicle_rate_y = 0.0;
 			PendulumDynamic::formula_7(angle_x, angle_y,
 									angle_x, angle_y,
 									&vehicle_rate_x, &vehicle_rate_y);
-			ROS_INFO("formula 7:%f %f", vehicle_rate_x, vehicle_rate_y);
+			//ROS_INFO("formula 7:%f %f", vehicle_rate_x, vehicle_rate_y);
+
+			ROS_INFO("result:%f    %f %f %f %f    %f %f %f %f    %f %f  %f %f %f %f  %f %f",
+				_pendulum_l,
+				_pose.position.x, _pose.position.y, _pendulum_output_x, _pendulum_output_y,
+				_pose.velocity.x, _pose.velocity.y, _pose.vel_acc.x, _pose.vel_acc.y,
+				vehicle_vel_acc_x, vehicle_vel_acc_y,
+				angle_x, angle_y, a, a/(_vehicle_multi_g*PendulumDynamic::g),
+				vehicle_rate_x, vehicle_rate_y);
 
 			if (_throttle_pub) {
 				std_msgs::Float64 throttle;
-				throttle.data = a/(1.5*PendulumDynamic::g); // 0~1
+				throttle.data = a/(_vehicle_multi_g*PendulumDynamic::g); // 0~1
 				_throttle_pub.publish(throttle);
 			}
 
@@ -168,7 +191,6 @@ void PendulumCtrl::threadFun() {
 			}
 		}
 
-		_rate.sleep();
 	}
 
 	ROS_INFO("exit threadFun");
@@ -212,9 +234,25 @@ void PendulumCtrl::disarmed() {
 }
 
 void PendulumCtrl::takeoff() {
+	mavros_msgs::SetMode offb_set_mode;
+	offb_set_mode.request.custom_mode = "AUTO.TAKEOFF";
+	if (_set_mode_client) {
+		if (_set_mode_client.call(offb_set_mode) &&
+				offb_set_mode.response.success){
+			ROS_INFO("takeoff enabled");
+		}
+	}
 }
 
 void PendulumCtrl::set_posctl() {
+	mavros_msgs::SetMode offb_set_mode;
+	offb_set_mode.request.custom_mode = "POSCTL";
+	if (_set_mode_client) {
+		if (_set_mode_client.call(offb_set_mode) &&
+				offb_set_mode.response.success){
+			ROS_INFO("posctl enabled");
+		}
+	}
 }
 
 void PendulumCtrl::set_offboard() {

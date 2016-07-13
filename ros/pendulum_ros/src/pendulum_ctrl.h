@@ -71,6 +71,7 @@ private:
 	static const double DEFAULT_PENDULUM_Y_D = 0.0;
 
 	double _pendulum_l;
+	double _vehicle_multi_g;
 	fmaros_msgs::PendulumPose _pose_local;
 	fmaros_msgs::PendulumPose _pose;
 	fmaros_msgs::PendulumPose _pose_sp;
