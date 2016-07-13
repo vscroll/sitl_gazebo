@@ -43,10 +43,10 @@ int main(int argc, char **argv)
 
   ros::NodeHandle n;
 
-  ros::Publisher pendulum_pub = n.advertise<fmaros_msgs::PendulumPose>("/FMA/Pendulum/Pose", 1000);
-  ros::Publisher vehicle_pub = n.advertise<fmaros_msgs::VehiclePose>("/FMA/Vehicle/Pose", 1000);
+  ros::Publisher pendulum_pub = n.advertise<fmaros_msgs::PendulumPose>("/FMA/Pendulum/Pose", 10);
+  ros::Publisher vehicle_pub = n.advertise<fmaros_msgs::VehiclePose>("/FMA/Vehicle/Pose", 10);
 
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(200);
 
   while (ros::ok())
   {
