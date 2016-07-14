@@ -107,25 +107,21 @@ void* PendulumCtrl::threadRun(void* argument) {
 void PendulumCtrl::threadFun() {
 	ROS_INFO("threadFun");
 	while(ros::ok()) {
-
-		_rate.sleep();
-
+		ros::spinOnce();
 		if (!_started) {
+			_rate.sleep();
 			continue;
 		}
-/*
-		_pose.header = _pose_local.header;
-		_pose.position = _pose_local.position;
-		_pose.velocity = _pose_local.velocity;
-		_pose.vel_acc = _pose_local.vel_acc;
-*/
+
 		if (_pose.header.seq == _pose_local.header.seq) {
-			//ROS_INFO("no pose data");
+			ROS_INFO("no pose data");
+			_rate.sleep();
 			continue;
 		}
 
 		_pose = _pose_local;
 		if (_pose.header.seq <= 0) {
+			_rate.sleep();
 			continue;
 		}
 
@@ -168,15 +164,15 @@ void PendulumCtrl::threadFun() {
 									angle_x, angle_y,
 									&vehicle_rate_x, &vehicle_rate_y);
 			//ROS_INFO("formula 7:%f %f", vehicle_rate_x, vehicle_rate_y);
-/*
-			ROS_INFO("result:%f    %f %f %f %f    %f %f %f %f    %f %f  %f %f %f %f  %f %f",
-				_pendulum_l,
+
+			ROS_INFO("result:%d    %f %f %f %f    %f %f %f %f    %f %f    %f %f %f %f    %f %f",
+				_pose.header.seq,
 				_pose.position.x, _pose.position.y, _pendulum_output_x, _pendulum_output_y,
 				_pose.velocity.x, _pose.velocity.y, _pose.vel_acc.x, _pose.vel_acc.y,
 				vehicle_vel_acc_x, vehicle_vel_acc_y,
 				angle_x, angle_y, a, a/(_vehicle_multi_g*PendulumDynamic::g),
 				vehicle_rate_x, vehicle_rate_y);
-*/
+
 			if (_throttle_pub) {
 				std_msgs::Float64 throttle;
 				throttle.data = a/(_vehicle_multi_g*PendulumDynamic::g); // 0~1
@@ -192,6 +188,7 @@ void PendulumCtrl::threadFun() {
 			}
 		}
 
+		_rate.sleep();
 	}
 
 	ROS_INFO("exit threadFun");
