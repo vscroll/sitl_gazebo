@@ -33,6 +33,9 @@ void PendulumPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
   else
     gzerr << "[gazebo_pendulum] Please specify a robotNamespace.\n";
+
+  node_handle_ = transport::NodePtr(new transport::Node());
+  node_handle_->Init(namespace_);
  
   // Store the pointer to the model
   model_ = _model;
@@ -59,11 +62,28 @@ void PendulumPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
     return;
   }
 
+  reset_sub_ = node_handle_->Subscribe("reset", &PendulumPlugin::ResetCallback, this);
+
   // Set remote port
   memset((char *)&_srcaddr, 0, sizeof(_srcaddr));
   _srcaddr.sin_family = AF_INET;
   _srcaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   _srcaddr.sin_port = htons(UDP_PORT);
+}
+
+void PendulumPlugin::ResetCallback(ResetPtr& reset_msg)
+{
+  printf("[PendulumPlugin]:Received Reset Message\n");
+  if (reset_msg->pendulum() == true) {
+    // Reset angular velocity
+    link_->SetAngularVel(math::Vector3(0, 0, 0));
+
+    math::Pose Pos(math::Vector3(0, 0, 0), math::Quaternion(0, 0, 0));
+    // Reset position
+    link_->SetRelativePose(Pos);
+
+    printf("[PendulumPlugin]:Reset Pendulum\n");
+  }
 }
 
   // Called by the world update start event

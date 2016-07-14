@@ -1,0 +1,7 @@
+syntax = "proto2";
+package reset_msgs.msgs;
+
+message Reset
+{
+  required bool pendulum  = 1;
+}

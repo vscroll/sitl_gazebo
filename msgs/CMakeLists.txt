@@ -31,6 +31,7 @@ set (msgs
   PendulumPose.proto
   VehiclePose.proto
   VehiclePendulumPose.proto
+  Reset.proto
 )
 PROTOBUF_GENERATE_CPP(PROTO_SRCS PROTO_HDRS ${msgs})
 add_library(mav_msgs SHARED ${PROTO_SRCS})

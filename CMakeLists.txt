@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8.8 FATAL_ERROR)
 find_package( PkgConfig REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(gazebo REQUIRED)
+find_package (Qt4)
 pkg_check_modules( EIGEN3 REQUIRED eigen3)
 pkg_check_modules( protobuf REQUIRED protobuf )
 
@@ -90,3 +91,13 @@ add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp)
 target_link_libraries(LiftDragPlugin mav_msgs ${Boost_LIBRARIES} ${GAZEBO_LIBRARIES} ${SDF_LIBRARIES} ${Boost_SYSTEM_LIBRARY_RELEASE} ${Boost_THREAD_LIBRARY_RELEASE})
 add_dependencies(LiftDragPlugin mav_msgs)
 endif()
+
+include (${QT_USE_FILE})
+add_definitions(${QT_DEFINITIONS})
+
+QT4_WRAP_CPP(headers_MOC include/gazebo_reset_plugin.h)
+
+add_library(gazebo_reset_widget SHARED ${headers_MOC}
+  src/gazebo_reset_plugin.cpp)
+target_link_libraries(gazebo_reset_widget mav_msgs ${GAZEBO_LIBRARIES}
+    ${QT_LIBRARIES})

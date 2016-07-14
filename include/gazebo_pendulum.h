@@ -22,11 +22,14 @@
 #include <stdio.h>
 
 #include "VehiclePendulumPose.pb.h"
+#include "Reset.pb.h"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 
 namespace gazebo {
+
+  typedef const boost::shared_ptr<const reset_msgs::msgs::Reset> ResetPtr;
 
   class PendulumPlugin : public ModelPlugin {
     public:
@@ -51,11 +54,17 @@ namespace gazebo {
     // Point to the update event connection
     event::ConnectionPtr updateConnection_;
 
+    transport::NodePtr node_handle_;
+
+    transport::SubscriberPtr reset_sub_;
+
     // vehicle pendulum pose message
     vehiclependulum_msgs::msgs::VehiclePendulumPose pose_message_;
     // vehicle pose message
     vehicle_msgs::msgs::VehiclePose* vehiclepose_;
     // pendulum pose message not declare here
+
+    void ResetCallback(ResetPtr& reset_msg);
   };
 }
 #endif
