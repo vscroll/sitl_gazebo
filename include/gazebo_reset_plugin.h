@@ -40,8 +40,11 @@ namespace gazebo
       /// \brief Callback trigged when the button is pressed.
       protected slots: void OnButton();
 
-      /// \brief Counter used to create unique model names
-      private: unsigned int counter;
+      /// \brief vehicle reset check box
+      private: QCheckBox *vehicle_checkbox;
+
+      /// \brief pendulum reset check box
+      private: QCheckBox *pendulum_checkbox;
 
       /// \brief Node used to establish communication with gzserver.
       private: transport::NodePtr node;

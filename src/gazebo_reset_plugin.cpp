@@ -28,8 +28,6 @@ GZ_REGISTER_GUI_PLUGIN(GUIResetWidget)
 GUIResetWidget::GUIResetWidget()
   : GUIPlugin()
 {
-  this->counter = 0;
-
   // Set the frame background and foreground colors
   this->setStyleSheet(
       "QFrame { background-color : rgba(100, 100, 100, 255); color : white; }");
@@ -46,6 +44,18 @@ GUIResetWidget::GUIResetWidget()
   // Create a push button, and connect it to the OnButton function
   QPushButton *button = new QPushButton(tr("Reset"));
   connect(button, SIGNAL(clicked()), this, SLOT(OnButton()));
+
+  // Create a vehicle reset check box
+  vehicle_checkbox = new QCheckBox(tr("Vehicle"));
+
+  // Create a pendulum reset check box
+  pendulum_checkbox = new QCheckBox(tr("Pendulum"));
+
+  // Add the vehicle box to the frame's layout
+  frameLayout->addWidget(vehicle_checkbox);
+
+  // Add the pendulum box to the frame's layout
+  frameLayout->addWidget(pendulum_checkbox);
 
   // Add the button to the frame's layout
   frameLayout->addWidget(button);
@@ -64,7 +74,7 @@ GUIResetWidget::GUIResetWidget()
 
   // Position and resize this widget
   this->move(10, 10);
-  this->resize(120, 30);
+  this->resize(120, 80);
 
   // Create a node for transportation
   this->node = transport::NodePtr(new transport::Node());
@@ -81,7 +91,18 @@ GUIResetWidget::~GUIResetWidget()
 void GUIResetWidget::OnButton()
 {
   reset_msgs::msgs::Reset reset;
-  reset.set_pendulum(true);
+
+  if (vehicle_checkbox->isChecked()) {
+    reset.set_vehicle(true);
+  } else {
+    reset.set_vehicle(false);
+  }
+
+  if (pendulum_checkbox->isChecked()) {
+    reset.set_pendulum(true);
+  } else {
+    reset.set_pendulum(false);
+  }
+
   this->resetPub->Publish(reset);
-  printf("[GUIResetWidget]:Publish Reset Message\n");
 }

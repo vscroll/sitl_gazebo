@@ -73,10 +73,25 @@ void PendulumPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
 void PendulumPlugin::ResetCallback(ResetPtr& reset_msg)
 {
-  printf("[PendulumPlugin]:Received Reset Message\n");
+  if (reset_msg->vehicle() == true) {
+    // Reset Position
+    model_->Reset();
+
+    // Reset angular velocity
+    model_->SetAngularVel(math::Vector3(0, 0, 0));
+
+    // Reset linear velocity
+    model_->SetLinearVel(math::Vector3(0, 0, 0));
+
+    printf("[PendulumPlugin]:Reset Vehicle\n");
+  }
+
   if (reset_msg->pendulum() == true) {
     // Reset angular velocity
     link_->SetAngularVel(math::Vector3(0, 0, 0));
+
+    // Reset linear velocity
+    link_->SetLinearVel(math::Vector3(0, 0, 0));
 
     math::Pose Pos(math::Vector3(0, 0, 0), math::Quaternion(0, 0, 0));
     // Reset position
