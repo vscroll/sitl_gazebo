@@ -161,7 +161,8 @@ public:
 
 		*angle_y = atan(vel_acc_x/g);
 		*angle_x = atan(-vel_acc_y*sin(*angle_y)/vel_acc_x);
-		*a = -vel_acc_y/sin(*angle_x);
+		//*a = -vel_acc_y/sin(*angle_x);
+		*a = g/(cos(*angle_x)*cos(*angle_y));
 	}
 
 	/*
