@@ -53,32 +53,32 @@
     <link name='link_pendulum'>
       <pose>0 0 -0 0 -0 0</pose>
       <inertial>
-        <pose>0 0 1.11 0 -0 0</pose>
-	<mass>0.2</mass>
-	<inertia>
-	  <ixx>0.334167</ixx>
-	  <ixy>0</ixy>
-	  <ixz>0</ixz>
-	  <iyy>0.334167</iyy>
-	  <iyz>0</iyz>
-	  <izz>0.00166667</izz>
-	</inertia>
+        <pose>0 0 0.61 0 -0 0</pose>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>0.334167</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.334167</iyy>
+          <iyz>0</iyz>
+          <izz>0.00166667</izz>
+        </inertia>
       </inertial>
       <collision name='collision_stick'>
-        <pose>0 0 1.11 0 0 0</pose>
-	<geometry>
-	  <cylinder>
+        <pose>0 0 0.61 0 0 0</pose>
+        <geometry>
+          <cylinder>
             <radius>0.005</radius>
-            <length>2</length>
+            <length>1</length>
           </cylinder>
         </geometry>
       </collision>
       <visual name='visual_stick'>
-        <pose>0 0 1.11 0 0 0</pose>
+        <pose>0 0 0.61 0 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.005</radius>
-            <length>2</length>
+            <length>1</length>
           </cylinder>
         </geometry>
         <material>
